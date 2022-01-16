@@ -109,13 +109,13 @@ public class MedicationLists {
         }
     }
 
-    public void addMedicationRequest(MedicationRequest mreq,  HashMap<String,String> cpRefs, Context ctx)
+    public void addMedicationRequest(MedicationRequest mreq,    Context ctx)
     {
         MccMedicationRecord mr = ctx.getMapper().fhir2local(mreq,ctx);
-        if (cpRefs.containsKey(mr.getFhirId()))
-        {
-            mr.setOnCareplans(cpRefs.get(mr.getFhirId()));
-        }
+//        if (cpRefs.containsKey(mr.getFhirId()))
+//        {
+//            mr.setOnCareplans(cpRefs.get(mr.getFhirId()));
+//        }
         String status = mr.getStatus();
         Integer s = activeMedReqKeys.get(status);
         if (s != null) {

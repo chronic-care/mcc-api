@@ -114,7 +114,7 @@ public class CareplanController {
             for (Bundle.BundleEntryComponent e : results.getEntry()) {
                 if (e.getResource().fhirType() == "CarePlan") {
                     CarePlan c = (CarePlan) e.getResource();
-                    if (c.getStatus().toCode().compareTo("active")==0 && c.getIntent().toCode().compareTo("plan") ==0 ) {
+                    if (c.getStatus() !=null && "active".equals(c.getStatus().toCode())) {
                         Set<String> addresses = carePlanRecognizedFor(c, ctx);
                         if (addresses.size()>0) {
                             out.add(mapper.fhir2Summary(c, addresses,ctx));
@@ -130,12 +130,7 @@ public class CareplanController {
 
         //If no matching conditions are found, use a lastModified Schema and the fallback list.
         //Controled  by a feature flag.
-        if (out.size() == 0 && bUseFallback )
-        {
-            matchScheme = "lastModified";
-            out = fallback;
-        }
-
+      
 
         if (out.size()>1)
         {
@@ -165,7 +160,16 @@ public class CareplanController {
                     break;
                 }
             }
+        }  
+        
+        if (out.size() == 0 && bUseFallback )
+        {
+        	MccCarePlanSummary mcps = new MccCarePlanSummary();;
+        	mcps.setFHIRId("NOID");
+			out.add(mcps );
         }
+
+        
         MccCarePlanSummary[] outA = new MccCarePlanSummary[out.size()];
         outA = out.toArray(outA);
         return outA;

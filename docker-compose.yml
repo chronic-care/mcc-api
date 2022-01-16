@@ -1,0 +1,21 @@
+services:
+  mccservices:
+    image: swmuir/mccservices 
+    container_name: mccservices
+    environment:
+       FHIR_SERVER : https://api.logicahealth.org/FHIRConnectathon2022/open
+       SECURE_FHIR_SERVER : fffffffffffff
+    ports:
+      - "8081:8081"
+    restart: always
+  
+  providersmartapp:
+    image: swmuir/providersmartapp
+    container_name: providersmartapp
+    environment:
+      CLIENT_ID :  3aaca932-59da-47fe-a4aa-cbf35f0d203f
+      xCLIENT_ID : 2a717f1b-9d4f-405e-848b-656902abe6be
+      API_SERVER : mccservices:8081
+    ports:
+      - "4200:80"
+    restart: always

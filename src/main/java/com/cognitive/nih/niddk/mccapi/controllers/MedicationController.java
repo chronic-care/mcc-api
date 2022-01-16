@@ -39,8 +39,8 @@ public class MedicationController {
         FHIRServices fhirSrv = FHIRServices.getFhirServices();
         IGenericClient client = fhirSrv.getClient(headers);
         Context ctx = contextManager.setupContext(subjectId, client, mapper, headers);
-        HashMap<String, String> carePlanMedicationsRequests = new HashMap<>();
-        getClanPlanMedReqIds(careplanId, carePlanMedicationsRequests, client, ctx);
+//        HashMap<String, String> carePlanMedicationsRequests = new HashMap<>();
+//        getClanPlanMedReqIds(careplanId, carePlanMedicationsRequests, client, ctx);
 
         Map<String, String> values = new HashMap<>();
         String callUrl = queryManager.setupQuery("MedicationRequest.Query", values, webRequest);
@@ -53,7 +53,7 @@ public class MedicationController {
             for (Bundle.BundleEntryComponent e : results.getEntry()) {
                 if (e.getResource().fhirType().compareTo("MedicationRequest") == 0) {
                     MedicationRequest mr = (MedicationRequest) e.getResource();
-                    out.addMedicationRequest(mr, carePlanMedicationsRequests, ctx);
+                    out.addMedicationRequest(mr,  ctx);
                 }
             }
         }
@@ -74,7 +74,7 @@ public class MedicationController {
         return out;
     }
 
-    private void getClanPlanMedReqIds(String careplanId, HashMap<String, String> carePlanMedicationsRequests, IGenericClient client, Context ctx) {
+    private void xxxgetClanPlanMedReqIds(String careplanId, HashMap<String, String> carePlanMedicationsRequests, IGenericClient client, Context ctx) {
         if (careplanId != null) {
             String[] cps = careplanId.split(",");
             Map<String, String> values = new HashMap<>();
@@ -144,8 +144,8 @@ public class MedicationController {
         IGenericClient client = fhirSrv.getClient(headers);
         Context ctx = contextManager.setupContext(subjectId, client, mapper, headers);
 
-        HashMap<String, String> carePlanMedicationsRequests = new HashMap<>();
-        getClanPlanMedReqIds(careplanId, carePlanMedicationsRequests, client, ctx);
+//        HashMap<String, String> carePlanMedicationsRequests = new HashMap<>();
+//        getClanPlanMedReqIds(careplanId, carePlanMedicationsRequests, client, ctx);
 
         Map<String, String> values = new HashMap<>();
         String callUrl = queryManager.setupQuery("MedicationRequest.Query", values, webRequest);
@@ -157,7 +157,7 @@ public class MedicationController {
             for (Bundle.BundleEntryComponent e : results.getEntry()) {
                 if (e.getResource().fhirType().compareTo("MedicationRequest") == 0) {
                     MedicationRequest mr = (MedicationRequest) e.getResource();
-                    out.addMedicationRequest(mr, carePlanMedicationsRequests, ctx);
+                    out.addMedicationRequest(mr,  ctx);
                 }
             }
         }

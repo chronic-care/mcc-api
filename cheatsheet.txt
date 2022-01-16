@@ -1,0 +1,91 @@
+
+
+
+Setting up Docker patient application
+
+Create Registered apps 
+Do not launch
+hard code client_id in launch.html
+save, build, build docker, push docker, deploy azure(see below)
+after succesful azure deploy - update register app with azure docker ip
+save
+launch 
+cross your fingers ;)
+
+
+ng build
+
+docker build commands
+
+docker build -t swmuir/mccservices .
+docker build -t swmuir/providersmartapp .
+docker build -t swmuir/patientsmartapp .
+
+docker push swmuir/mccservices
+docker push swmuir/providersmartapp
+docker push swmuir/patientsmartapp
+
+local docker run commands
+
+docker run -it   -p 4200:80 --rm swmuir/providersmartapp
+
+docker run -it   -p 4300:80 --rm swmuir/patientsmartapp
+
+docker deploy commands 
+
+docker push swmuir/patientsmartapp
+
+install azure cli
+
+brew update && brew install azure-cli
+
+
+
+Create the container
+ 
+az container create --resource-group EMIMCC --name patientsmartapp --image swmuir/patientsmartapp::latest --ip-address Public  --dns-name-label patientsmartapp
+
+az container create --resource-group EMIMCC --name providersmartapp --image swmuir/providersmartapp::latest --ip-address Public  --dns-name-label providersmartapp
+
+az container create --resource-group EMIMCC \
+--name mccservices6 --image swmuir/mccservices::latest \
+--ip-address Public --ports 8081 \
+--environment-variables 'PORT'='8081' --dns-name-label mccservices
+
+  
+ az container create --resource-group EMIMCC \
+--name patientsmartappxxx --image swmuir/patientsmartappxxx::latest \
+--ip-address Public   
+
+
+az container create --resource-group EMIMCC \
+--name patientsmartapp6 --image swmuir/patientsmartapp::latest \
+--ip-address Public  --ports 4200 \
+--environment-variables 'PORT'='80' 
+
+az container create --resource-group EMIMCC \
+--name providersmartapp6 --image swmuir/providersmartapp::latest \
+--ip-address Public --ports 80 \
+--environment-variables 'PORT'='80'
+
+
+az container create --resource-group EMIMCC \
+--name providersmartapp13 --image swmuir/providersmartapp::latest \
+--ip-address Public  
+
+
+redeploy the container
+az container restart --resource-group EMIMCC --name providersmartapp13
+
+
+xxxaz container create -g EMIMCC --name mccservices4 --image swmuir/mccservices::latest  -port 8081
+
+Set the container
+
+xxxaz webapp config appsettings set --resource-group EMIMCC --name mccservices2 --settings WEBSITES_PORT=8000
+
+
+
+az webapp log config --name mccservices --resource-group EMIMCC --docker-container-logging filesystem
+
+az webapp log tail --name mccservices --resource-group EMIMCC

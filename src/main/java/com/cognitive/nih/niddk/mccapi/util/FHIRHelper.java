@@ -717,7 +717,7 @@ public class FHIRHelper {
     }
 
     public static String getConceptDisplayString(CodeableConcept concept) {
-        if (!concept.getText().isBlank()) {
+        if (!StringUtils.isEmpty(concept.getText())) {
             return concept.getText();
         }
         String out = null;

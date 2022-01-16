@@ -67,7 +67,7 @@ public class GoalLists {
             case ACTIVE_LIST:
             {
                 allGoals.add(goal);
-                if(goal.getExpressedByType().compareTo("Patient")==0)
+                if("Patient".equals(goal.getExpressedByType()))
                 {
                     activePatientGoals.add(goal);
                 }
@@ -81,7 +81,7 @@ public class GoalLists {
             case INACTIVE_LIST:
             {
                 allGoals.add(goal);
-                if(goal.getExpressedByType().compareTo("Patient")==0)
+                if("Patient".equals(goal.getExpressedByType()))
                 {
                     inactivePatientGoals.add(goal);
                 }
