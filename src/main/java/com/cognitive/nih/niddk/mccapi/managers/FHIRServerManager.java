@@ -19,10 +19,10 @@ import java.util.logging.Level;
 @Component
 public class FHIRServerManager {
 
-    @Value("${fhir.default.server.address:https://api.logicahealth.org/MCCeCarePlanTest/open}")
+    @Value("${FHIR_SERVER}")
     private String defaultFHIRServerAddress;
-    @Value("${fhir.secure.server.address:https://api.logicahealth.org/MCCeCarePlanTest/data}")
-    private String defaultFHIRSecureAddress;
+    // @Value("${FHIR_SERVER}")
+    // private String defaultFHIRSecureAddress;
     @Value("${fhir.connect.timeout:30000}")
     private String connectTimeout;
     @Value("${fhir.request.timeout:30000}")
@@ -91,13 +91,13 @@ public class FHIRServerManager {
         defaultFHIRServer = srv;
         log.info("Default FHIR Server = "+defaultFHIRServerAddress);
         addServer(srv);
-        srv = new FHIRServer();
-        //srv.setBaseURL("https://api.logicahealth.org/MCCeCarePlanTest/data");
-        srv.setBaseURL(defaultFHIRSecureAddress);
-        log.info("Default FHIR Secure Server = "+defaultFHIRSecureAddress);
-        srv.setName("MMC eCarePlan Test (Secure)");
-        srv.setId("MCCeCarePlanTestSecure");
-        addServer(srv);
+        // srv = new FHIRServer();
+        // //srv.setBaseURL("https://api.logicahealth.org/MCCeCarePlanTest/data");
+        // srv.setBaseURL(defaultFHIRSecureAddress);
+        // log.info("Default FHIR Secure Server = "+defaultFHIRSecureAddress);
+        // srv.setName("MMC eCarePlan Test (Secure)");
+        // srv.setId("MCCeCarePlanTestSecure");
+        // addServer(srv);
 
         if (singleton == null)
         {

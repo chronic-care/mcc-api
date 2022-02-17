@@ -112,9 +112,15 @@ public class GoalMapper implements IGoalMapper {
     {
         GoalSummary out = new GoalSummary();
         IR4Mapper mapper = ctx.getMapper();
+        if (in.getIdElement() != null) {
         out.setFHIRId(in.getIdElement().getIdPart());
+        }
+        if (in.getDescription() != null) {
         out.setDescription(in.getDescription().getText());
+        }
+        if (in.getLifecycleStatus() != null) {
         out.setLifecycleStatus(in.getLifecycleStatus().toCode());
+        }
         Coding pcd = FHIRHelper.getCodingForSystem(in.getPriority(),"http://terminology.hl7.org/CodeSystem/goal-priority");
         out.setPriority(pcd==null?"Undefined":pcd.getCode());
         List<Goal.GoalTargetComponent> targets = in.getTarget();

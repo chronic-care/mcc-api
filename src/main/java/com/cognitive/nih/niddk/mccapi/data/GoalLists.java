@@ -61,6 +61,7 @@ public class GoalLists {
         {
             activeStatus = Integer.valueOf(IGNORE);
             logger.warn("Lifecycle status of {} is not known, ignoreing this goal",goal.getLifecycleStatus());
+            allGoals.add(goal);
         }
         switch (activeStatus.intValue())
         {
