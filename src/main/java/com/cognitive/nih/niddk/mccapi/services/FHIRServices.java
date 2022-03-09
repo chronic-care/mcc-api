@@ -40,19 +40,19 @@ public class FHIRServices {
         FHIRServerManager srvMgr = FHIRServerManager.getManager();
         //FhirContext fhirContext = FHIRServices.getFhirServices().getR4Context();
 
-//        if (headers.containsKey("mcc-fhir-server")) {
-//            String server = headers.get("mcc-fhir-server");
-//            log.info("Server is " + server);
-//            client = stu4Context.newRestfulGenericClient(server);
-//            if (headers.containsKey("mcc-token")) {
-//                BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(headers.get("mcc-token"));
-//                client.registerInterceptor(authInterceptor);
-//            }
-//        } else {
+        if (headers.containsKey("mcc-fhir-server")) {
+            String server = headers.get("mcc-fhir-server");
+            log.info("Server is " + server);
+            client = stu4Context.newRestfulGenericClient(server);
+            if (headers.containsKey("mcc-token")) {
+                BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(headers.get("mcc-token"));
+                client.registerInterceptor(authInterceptor);
+            }
+        } else {
             log.warn("No Server provided - using default");
             FHIRServer srv = srvMgr.getDefaultFHIRServer();
             client = stu4Context.newRestfulGenericClient(srv.getBaseURL());
-//        }
+        }
         if (srvMgr.isEnableFHIRLogging()) {
             client.registerInterceptor(srvMgr.getLoggingInterceptor());
         }
