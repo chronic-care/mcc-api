@@ -1,9 +1,12 @@
 /*Copyright 2021 Cognitive Medical Systems*/
 package com.cognitive.nih.niddk.mccapi.controllers;
 
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.cognitive.nih.niddk.mccapi.data.Context;
 import com.cognitive.nih.niddk.mccapi.data.Demographics;
+import com.cognitive.nih.niddk.mccapi.data.MccGoal;
 import com.cognitive.nih.niddk.mccapi.data.MccObservation;
 import com.cognitive.nih.niddk.mccapi.data.MccValueSet;
 import com.cognitive.nih.niddk.mccapi.data.primative.*;
@@ -11,18 +14,24 @@ import com.cognitive.nih.niddk.mccapi.exception.ItemNotFoundException;
 import com.cognitive.nih.niddk.mccapi.managers.ContextManager;
 import com.cognitive.nih.niddk.mccapi.managers.QueryManager;
 import com.cognitive.nih.niddk.mccapi.managers.ValueSetManager;
+import com.cognitive.nih.niddk.mccapi.mappers.GoalMapper;
 import com.cognitive.nih.niddk.mccapi.mappers.IR4Mapper;
+import com.cognitive.nih.niddk.mccapi.mappers.ObservationMapper;
 import com.cognitive.nih.niddk.mccapi.services.FHIRServices;
 import com.cognitive.nih.niddk.mccapi.util.MccHelper;
 import com.cognitive.nih.niddk.mccapi.util.UCUMHelper;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
@@ -675,6 +684,30 @@ public class ObservationController {
         }
         return out;
     }
+    
+   
+    
+	@PostMapping("/createPROM")
+	public String createPROM(@RequestHeader Map<String, String> headers,
+			@RequestParam(required = true, name = "patientId") String patientId, @RequestBody MccObservation mccObservation) {
+		
+		
+
+//		if (StringUtils.isEmpty(mccGoal.getLifecycleStatus()) || mccGoal.getDescription() == null) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//					(mccGoal.getDescription() == null ? "Description Required" : "")
+//							+ (StringUtils.isEmpty(mccGoal.getLifecycleStatus()) ? "LifecycleStatus Required" : ""));
+//		}
+		
+		 
+		FHIRServices fhirSrv = FHIRServices.getFhirServices();
+		IGenericClient client = fhirSrv.getClient(headers);
+		MethodOutcome result = client.create().resource(ObservationMapper.local2fhir(patientId, mccObservation)).execute();
+		IParser parser = client.getFhirContext().newJsonParser();
+		return parser.encodeResourceToString(result.getResource());
+	}
+	
+	
 
     /**
      * Finds the queries that will match the request, for most modes this will be a single item

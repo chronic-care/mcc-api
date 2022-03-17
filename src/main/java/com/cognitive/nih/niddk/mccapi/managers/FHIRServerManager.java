@@ -82,7 +82,7 @@ public class FHIRServerManager {
     @PostConstruct
     private void defineDefaultServers() {
         FHIRServer srv = new FHIRServer();
-        String env = System.getenv("DEFAULT_FHIR_SERVER");
+//        String env = System.getenv("DEFAULT_FHIR_SERVER");
 
         //srv.setBaseURL("https://api.logicahealth.org/MCCeCarePlanTest/open");
         srv.setBaseURL(defaultFHIRServerAddress);
