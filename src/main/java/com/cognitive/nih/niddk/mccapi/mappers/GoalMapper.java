@@ -79,18 +79,22 @@ public class GoalMapper implements IGoalMapper {
 			for (Extension e : acc) {
 				Acceptance a = new Acceptance();
 				List<Extension> i = e.getExtensionsByUrl("individual");
-				Base b = i.get(0).getValue();
-				Reference r = b.castToReference(b);
-				a.setIndividual(mapper.fhir2local(r, ctx));
+				if (!i.isEmpty()) {
+					Base b = i.get(0).getValue();
+					Reference r = b.castToReference(b);
+					a.setIndividual(mapper.fhir2local(r, ctx));
 
+				}
+			
+				
 				List<Extension> s = e.getExtensionsByUrl("status");
-				if (s != null && s.size() > 0) {
-					b = s.get(0).getValue();
+				if (!s.isEmpty()) {
+					Base b = s.get(0).getValue();
 					a.setCode(b.castToCode(b).getValue());
 				}
 				List<Extension> p = e.getExtensionsByUrl("priority");
-				if (p != null && p.size() > 0) {
-					b = p.get(0).getValue();
+				if (!p.isEmpty()) {
+					Base b = p.get(0).getValue();
 					a.setPriority(mapper.fhir2local(b.castToCodeableConcept(b), ctx));
 				}
 				acceptances[cnt] = a;

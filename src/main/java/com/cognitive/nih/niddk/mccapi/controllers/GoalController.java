@@ -21,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Goal;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Patient.LinkType;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -85,9 +88,6 @@ public class GoalController {
 
 		if (callUrl != null) {
 			Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
-			// Bundle results =
-			// client.search().forResource(Goal.class).where(Goal.SUBJECT.hasId(subjectId))
-			// .returnBundle(Bundle.class).execute();
 			Context ctx = contextManager.setupContext(subjectId, client, mapper, headers);
 			for (Bundle.BundleEntryComponent e : results.getEntry()) {
 				if (e.getResource().fhirType().compareTo("Goal") == 0) {
@@ -96,6 +96,16 @@ public class GoalController {
 					out.addSummary(gs);
 				}
 			}
+			
+			  results = fhirSrv.getIOClient().fetchResourceFromUrl(Bundle.class, callUrl);
+			  
+				for (Bundle.BundleEntryComponent e : results.getEntry()) {
+					if (e.getResource().fhirType().compareTo("Goal") == 0) {
+						Goal g = (Goal) e.getResource();
+						GoalSummary gs = mapper.fhir2summary(g, ctx);
+						out.addSummary(gs);
+					}
+				}
 		}
 		return out;
 	}
@@ -111,10 +121,16 @@ public class GoalController {
 
 		if (callUrl != null) {
 			Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
-			// Bundle results =
-			// client.search().forResource(Goal.class).where(Goal.SUBJECT.hasId(subjectId))
-			// .returnBundle(Bundle.class).execute();
 			Context ctx = contextManager.setupContext(subjectId, client, mapper, headers);
+			for (Bundle.BundleEntryComponent e : results.getEntry()) {
+				if (e.getResource().fhirType().compareTo("Goal") == 0) {
+					Goal g = (Goal) e.getResource();
+					out.add(mapper.fhir2local(g, ctx));
+				}
+			}
+			
+			  results = fhirSrv.getIOClient().fetchResourceFromUrl(Bundle.class, callUrl);
+			 
 			for (Bundle.BundleEntryComponent e : results.getEntry()) {
 				if (e.getResource().fhirType().compareTo("Goal") == 0) {
 					Goal g = (Goal) e.getResource();
@@ -153,7 +169,7 @@ public class GoalController {
 	}
 
 	@PostMapping("/creategoal")
-	public String createGoal(@RequestHeader Map<String, String> headers,
+	public String createGoal(@RequestHeader Map<String, String> headers,@RequestParam(required = false, name = "fhirRepository") String fhirRepository,
 			@RequestParam(required = true, name = "patientId") String patientId, @RequestBody MccGoal mccGoal) {
 
 		if (StringUtils.isEmpty(mccGoal.getLifecycleStatus()) || mccGoal.getDescription() == null) {
@@ -162,7 +178,16 @@ public class GoalController {
 							+ (StringUtils.isEmpty(mccGoal.getLifecycleStatus()) ? "LifecycleStatus Required" : ""));
 		}
 		FHIRServices fhirSrv = FHIRServices.getFhirServices();
-		IGenericClient client = fhirSrv.getClient(headers);
+		IGenericClient client = fhirSrv.getIOClient( );
+		Patient patient = new Patient();
+		
+		LinkType lt;
+		Reference patientreference = new Reference();
+		patientreference.setId(patientId);		
+		patient.addLink().setOther(patientreference).setType(LinkType.SEEALSO);
+		
+		MethodOutcome patientResult = client.create().resource(patient).execute();
+		
 		MethodOutcome result = client.create().resource(GoalMapper.local2FHIR(patientId, mccGoal)).execute();
 		IParser parser = client.getFhirContext().newJsonParser();
 		return parser.encodeResourceToString(result.getResource());

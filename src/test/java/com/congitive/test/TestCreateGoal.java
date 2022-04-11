@@ -37,7 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @RunWith(SpringRunner.class)
 
 @SpringBootTest(classes = MccApiApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = { "FHIR_SERVER=https://gw.interop.community/CarePlanningQA/open" })
+@TestPropertySource(properties = { "FHIR_SERVER=https://gw.interop.community/CarePlanningQA/open", "FHIRIO_SERVER=https://gw.interop.community/FHRIIOTest/open" })
 public class TestCreateGoal {
 
 	@Autowired
@@ -90,7 +90,7 @@ public class TestCreateGoal {
 
 		aaa[0].setPriority(createMccCodeableConcept("priority"));
 		mccGoal.setAcceptance(aaa);
-		ResponseEntity<String> response = template.postForEntity("/creategoal?patientId=smart-1557780", mccGoal,
+		ResponseEntity<String> response = template.postForEntity("/creategoal?patientId=1", mccGoal,
 				String.class);
 		assertTrue(response.getStatusCode().equals(HttpStatus.OK));
 		System.out.println(response.getBody());
@@ -115,6 +115,15 @@ public class TestCreateGoal {
 		assertTrue(response.getStatusCode().equals(HttpStatus.OK));
 		System.out.println(response.getBody());
 
+	}
+	
+	@Test
+	public void testGetGoals() {
+		 
+		ResponseEntity<String> response = template.getForEntity("/goal?subject=smart-1557780", 
+				String.class);
+		assertTrue(response.getStatusCode().equals(HttpStatus.BAD_REQUEST));
+		System.out.println(response.getBody());
 	}
 
 }

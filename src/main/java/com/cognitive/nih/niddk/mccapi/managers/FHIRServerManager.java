@@ -19,165 +19,124 @@ import java.util.logging.Level;
 @Component
 public class FHIRServerManager {
 
-    @Value("${FHIR_SERVER}")
-    private String defaultFHIRServerAddress;
-    // @Value("${FHIR_SERVER}")
-    // private String defaultFHIRSecureAddress;
-    @Value("${fhir.connect.timeout:30000}")
-    private String connectTimeout;
-    @Value("${fhir.request.timeout:30000}")
-    private String requestTimeout;
-    @Value("${hapi.logging.enabled:false}")
-    private String enableLogging;
-    @Value("${hapi.logging.request.summary:true}")
-    private String log_request_summary;
-    @Value("${hapi.logging.request:body:false}")
-    private String log_request_body;
-    @Value("${hapi.logging.request.header:false}")
-    private String log_request_header;
-    @Value("${hapi.logging.response.summary:true}")
-    private String log_response_summary;
-    @Value("${hapi.logging.response.body:false}")
-    private String log_response_body;
-    @Value("${hapi.logging.response.header:false}")
-    private String log_response_header;
+	@Value("${FHIR_SERVER}")
+	private String defaultFHIRServerAddress;
 
-    private FHIRServer defaultFHIRServer;
+	@Value("${FHIRIO_SERVER}")
+	private String fhirIOServerAddress;
 
-    private HashMap<String, FHIRServer> serverRegistry;
+	@Value("${fhir.connect.timeout:30000}")
+	private String connectTimeout;
+	@Value("${fhir.request.timeout:30000}")
+	private String requestTimeout;
+	@Value("${hapi.logging.enabled:false}")
+	private String enableLogging;
+	@Value("${hapi.logging.request.summary:true}")
+	private String log_request_summary;
+	@Value("${hapi.logging.request:body:false}")
+	private String log_request_body;
+	@Value("${hapi.logging.request.header:false}")
+	private String log_request_header;
+	@Value("${hapi.logging.response.summary:true}")
+	private String log_response_summary;
+	@Value("${hapi.logging.response.body:false}")
+	private String log_response_body;
+	@Value("${hapi.logging.response.header:false}")
+	private String log_response_header;
 
-    public LoggingInterceptor getLoggingInterceptor() {
-        return loggingInterceptor;
-    }
+	private FHIRServer defaultFHIRServer;
 
-    public boolean isEnableFHIRLogging() {
-        return enableFHIRLogging;
-    }
+	private FHIRServer fhirIOServer;
 
-    private boolean enableFHIRLogging;
-    public int connTimeout = 30 * 1000;
-    public int reqTimeout = 30 * 1000;
+	public LoggingInterceptor getLoggingInterceptor() {
+		return loggingInterceptor;
+	}
 
-    private LoggingInterceptor loggingInterceptor;
-    private static FHIRServerManager singleton; // = new FHIRServerManager();
+	public boolean isEnableFHIRLogging() {
+		return enableFHIRLogging;
+	}
 
-    public FHIRServerManager() {
-        serverRegistry = new HashMap<>();
-        //defineDefaultServers();
-    }
+	private boolean enableFHIRLogging;
+	public int connTimeout = 30 * 1000;
+	public int reqTimeout = 30 * 1000;
 
-    public static FHIRServerManager getManager() {
-        return singleton;
-    }
+	private LoggingInterceptor loggingInterceptor;
+	private static FHIRServerManager singleton; // = new FHIRServerManager();
 
+	public FHIRServerManager() {
+		 
+	}
 
-    public FHIRServer getDefaultFHIRServer() {
-        return defaultFHIRServer;
-    }
+	public static FHIRServerManager getManager() {
+		return singleton;
+	}
 
-    public void setDefaultFHIRServer(FHIRServer defaultFHIRServer) {
-        this.defaultFHIRServer = defaultFHIRServer;
-    }
+	public FHIRServer getDefaultFHIRServer() {
+		return defaultFHIRServer;
+	}
 
-    @PostConstruct
-    private void defineDefaultServers() {
-        FHIRServer srv = new FHIRServer();
-//        String env = System.getenv("DEFAULT_FHIR_SERVER");
+	public FHIRServer getFHIRIOServer() {
+		return fhirIOServer;
+	}
 
-        //srv.setBaseURL("https://api.logicahealth.org/MCCeCarePlanTest/open");
-        srv.setBaseURL(defaultFHIRServerAddress);
-        srv.setName("MMC eCarePlan Test");
-        srv.setId("MCCeCarePlanTest");
-        defaultFHIRServer = srv;
-        log.info("Default FHIR Server = "+defaultFHIRServerAddress);
-        addServer(srv);
-        // srv = new FHIRServer();
-        // //srv.setBaseURL("https://api.logicahealth.org/MCCeCarePlanTest/data");
-        // srv.setBaseURL(defaultFHIRSecureAddress);
-        // log.info("Default FHIR Secure Server = "+defaultFHIRSecureAddress);
-        // srv.setName("MMC eCarePlan Test (Secure)");
-        // srv.setId("MCCeCarePlanTestSecure");
-        // addServer(srv);
+	public void setDefaultFHIRServer(FHIRServer defaultFHIRServer) {
+		this.defaultFHIRServer = defaultFHIRServer;
+	}
 
-        if (singleton == null)
-        {
-            singleton = this;
-        }
+	@PostConstruct
+	private void createServers() {
+		defaultFHIRServer = defineDefaultServers("MMC eCarePlan Test", "MCCeCarePlanTest", defaultFHIRServerAddress);
+		fhirIOServer = defineDefaultServers("MMC eCarePlan FHIR IO Server", "FHIRIOServer", fhirIOServerAddress);
+	}
 
-        if (requestTimeout != null)
-        {
-            if (requestTimeout.length()>0)
-            {
-                try {
-                    reqTimeout = Integer.parseInt(requestTimeout);
-                    log.info("Config: fhir.request.timeout = "+requestTimeout);
-                }
-                catch(Exception e)
-                {
-                  log.log(Level.WARNING,"Failed to parse FHIR request timeout ("+requestTimeout+"), using default",e);
-                }
-            }
-        }
+	private FHIRServer defineDefaultServers(String name, String id, String fhirAddress) {
+		FHIRServer srv = new FHIRServer();
+		srv.setBaseURL(fhirAddress);
+		srv.setName(name);
+		srv.setId(id);
 
-        if (connectTimeout != null)
-        {
-            if (connectTimeout.length()>0)
-            {
-                try {
-                    connTimeout = Integer.parseInt(connectTimeout);
-                    log.info("Config: fhir.connect.timeout = "+connectTimeout);
-                }
-                catch(Exception e)
-                {
-                    log.log(Level.WARNING,"Failed to parse FHIR conect timeout ("+connectTimeout+"), using default",e);
-                }
-            }
-        }
-        enableFHIRLogging = Boolean.valueOf(enableLogging).booleanValue();
+		log.info("Default FHIR Server = " + defaultFHIRServerAddress);
+//        addServer(srv);
+		if (singleton == null) {
+			singleton = this;
+		}
 
-        if (enableFHIRLogging)
-        {
-            loggingInterceptor = new LoggingInterceptor();
-            loggingInterceptor.setLogRequestBody(Boolean.valueOf(log_response_body).booleanValue());
-            loggingInterceptor.setLogRequestHeaders(Boolean.valueOf(log_request_header).booleanValue());
-            loggingInterceptor.setLogRequestSummary(Boolean.valueOf(log_request_summary).booleanValue());
-            loggingInterceptor.setLogResponseSummary(Boolean.valueOf(log_response_summary).booleanValue());
-            loggingInterceptor.setLogResponseBody(Boolean.valueOf(log_response_body).booleanValue());
-            loggingInterceptor.setLogResponseHeaders(Boolean.valueOf(log_response_header).booleanValue());
-        }
+		if (requestTimeout != null) {
+			if (requestTimeout.length() > 0) {
+				try {
+					reqTimeout = Integer.parseInt(requestTimeout);
+					log.info("Config: fhir.request.timeout = " + requestTimeout);
+				} catch (Exception e) {
+					log.log(Level.WARNING,
+							"Failed to parse FHIR request timeout (" + requestTimeout + "), using default", e);
+				}
+			}
+		}
 
+		if (connectTimeout != null) {
+			if (connectTimeout.length() > 0) {
+				try {
+					connTimeout = Integer.parseInt(connectTimeout);
+					log.info("Config: fhir.connect.timeout = " + connectTimeout);
+				} catch (Exception e) {
+					log.log(Level.WARNING,
+							"Failed to parse FHIR conect timeout (" + connectTimeout + "), using default", e);
+				}
+			}
+		}
+		enableFHIRLogging = Boolean.valueOf(enableLogging).booleanValue();
 
-    }
+		if (enableFHIRLogging) {
+			loggingInterceptor = new LoggingInterceptor();
+			loggingInterceptor.setLogRequestBody(Boolean.valueOf(log_response_body).booleanValue());
+			loggingInterceptor.setLogRequestHeaders(Boolean.valueOf(log_request_header).booleanValue());
+			loggingInterceptor.setLogRequestSummary(Boolean.valueOf(log_request_summary).booleanValue());
+			loggingInterceptor.setLogResponseSummary(Boolean.valueOf(log_response_summary).booleanValue());
+			loggingInterceptor.setLogResponseBody(Boolean.valueOf(log_response_body).booleanValue());
+			loggingInterceptor.setLogResponseHeaders(Boolean.valueOf(log_response_header).booleanValue());
+		}
+		return srv;
 
-    public FHIRServer getServer(String id) {
-        return serverRegistry.get(id);
-    }
-
-    public FHIRServer getServerWithDefault(String id) {
-        FHIRServer srv = null;
-        if (id != null )
-        {
-            srv = serverRegistry.get(id);
-        }
-        if (srv == null)
-        {
-            srv = defaultFHIRServer;
-        }
-        return srv;
-    }
-
-    public void addServer(FHIRServer srv) {
-        serverRegistry.put(srv.getId(), srv);
-    }
-
-    public void removeServer(FHIRServer srv) {
-        serverRegistry.remove(srv.getId());
-    }
-
-    public List<FHIRServer> getServers() {
-        return new ArrayList<FHIRServer>(serverRegistry.values());
-    }
-
-
+	}
 
 }
