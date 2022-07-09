@@ -79,52 +79,7 @@ public class MedicationMapper implements IMedicationMapper {
         return out;
     }
 
-    public MccMedicationRecord fhir2local(MedicationStatement in, Context ctx) {
-        MccMedicationRecord out = new MccMedicationRecord();
-        IR4Mapper mapper = ctx.getMapper();
-        out.setType("MedicationStatement");
-        out.setFhirId(in.getIdElement().getIdPart());
-        out.setStatus(in.getStatus().toCode());
-        if (in.hasStatusReason()) {
-            out.setStatusReasons(mapper.fhir2local(in.getStatusReason(), ctx));
-        }
-        if (in.hasCategory()) {
-            MccCodeableConcept[] categories = new MccCodeableConcept[1];
-            categories[0] = mapper.fhir2local(in.getCategory(), ctx);
-            out.setCategories(categories);
-        }
-        if (in.hasMedication()) {
-            if (in.hasMedicationCodeableConcept()) {
-                out.setMedication(mapper.fhir2local(in.getMedicationCodeableConcept(), ctx));
-            }
-            if (in.hasMedicationReference()) {
-                Reference ref = in.getMedicationReference();
-                if (ref.getDisplay() != null) {
-                    MccCodeableConcept med = new MccCodeableConcept();
-                    med.setText(ref.getDisplay());
-                    out.setMedication(med);
-                } else {
-                    Medication med = ReferenceResolver.findMedication(ref, ctx);
-                    if (med != null) {
-                        out.setMedication(mapper.fhir2local(med.getCode(), ctx));
-                    } else {
-                        log.warn("Failed to resolve reference: " + ref.toString());
-                    }
-                }
-            }
-        }
-        if (in.hasReasonCode()) {
-            out.setReasons(mapper.fhir2local(in.getReasonCode(), ctx));
-        }
-
-        if (in.hasNote()) {
-            out.setNote(FHIRHelper.annotationsToString(in.getNote(),ctx));
-        }
-        if (in.hasReasonReference()) {
-            out.setReasonReferences(mapper.fhir2local_referenceArray(in.getReasonReference(), ctx));
-        }
-        return out;
-    }
+     
 
 
     public MedicationSummary fhir2summary(MedicationRequest in, Context ctx) {
@@ -171,6 +126,7 @@ public class MedicationMapper implements IMedicationMapper {
             out.setReasons(reasons.toString());
         }
 
+       
 
         //Boil down the dosage instructions
         if (in.hasDosageInstruction()) {
@@ -195,7 +151,7 @@ public class MedicationMapper implements IMedicationMapper {
         if (in.hasPriority()) {
             out.setPriority(in.getPriority().getDisplay());
         }
-
+        
         if (in.hasDetectedIssue()) {
             List<Reference> issueReferences = in.getDetectedIssue();
             out.setIssues(handleIssues(issueReferences, ctx));
@@ -204,87 +160,43 @@ public class MedicationMapper implements IMedicationMapper {
         if (in.hasRequester()) {
             out.setRequestedBy(NameResolver.getReferenceName(in.getRequester(),ctx));
         }
-        return out;
-    }
 
-    public MedicationSummary fhir2summary(MedicationStatement in, Context ctx) {
-        MedicationSummary out = new MedicationSummary();
-        out.setType("MedicationStatement");
-        out.setFhirId(in.getIdElement().getIdPart());
-        out.setStatus(in.getStatus().toCode());
-
-        if (in.hasCategory()) {
-            out.setCategories(FHIRHelper.getConceptDisplayString(in.getCategory()));
-        }
-        if (in.hasMedication()) {
-            if (in.hasMedicationCodeableConcept()) {
-                out.setMedication(in.getMedicationCodeableConcept().getText());
-            }
-            if (in.hasMedicationReference()) {
-                Reference ref = in.getMedicationReference();
-                String name = NameResolver.getReferenceName(ref,ctx);
-                if (name != null)
-                    out.setMedication(name);
-                if (ref.getDisplay() != null) {
-                    out.setMedication(ref.getDisplay());
-                } else {
-                    Medication med = ReferenceResolver.findMedication(ref, ctx);
-                    if (med != null) {
-                        out.setMedication(med.getCode().getText());
-                    } else {
-                        log.warn("Failed to resolve reference: " + ref.toString());
-                    }
-                }
-            }
+        
+        if (in.hasAuthoredOn()){
+            out.setEffectiveDate( FHIRHelper.dateToString(in.getAuthoredOn()));
         }
 
-        ///Handle Reasons
-        StringBuilder reasons = new StringBuilder();
-        if (in.hasReasonCode()) {
-            reasons.append(FHIRHelper.getConceptsAsDisplayString(in.getReasonCode()));
-        }
-        if (in.hasReasonReference()) {
-            handleReasonReference(in.getReasonReference(), reasons, ctx);
-        }
-        if (reasons.length() > 0) {
-            out.setReasons(reasons.toString());
-        }
+        if (in.hasDispenseRequest()) {
 
-        if (in.hasDosage())
-        {
-            StringBuilder inst = new StringBuilder();
-            List<Dosage> instructions = in.getDosage();
-            if (instructions.size() > 1) {
-                inst.append("Multiple Dosages...");
+            if ( in.getDispenseRequest().hasNumberOfRepeatsAllowed()  ) {
+                out.setRefillsPermitted( String.valueOf( in.getDispenseRequest().getNumberOfRepeatsAllowed()));
             } else {
-
-                Dosage d = instructions.get(0);
-                if (d.hasText()) {
-                    inst.append(d.getText());
-                } else {
-                    inst.append(FHIRHelper.dosageToString(d));
-                }
+                out.setRefillsPermitted("Unknown");
+            }            
+        } else {
+            out.setRefillsPermitted("Unknown");
+        }
+       
+        if (in.hasDosageInstruction()) {
+            if (in.getDosageInstructionFirstRep().hasRoute()) {
+                out.setMethod(in.getDosageInstructionFirstRep().getRoute().getText());
             }
-            if (inst.length() > 0) {
-                out.setDosages(inst.toString());
-            }
         }
-        /*
-        if (in.hasPriority()) {
-            out.setPriority(in.getPriority().getDisplay());
+        StringBuffer sb  = new StringBuffer();
+        
+        for (Annotation note : in.getNote()) {
+        	sb.append(note.getText());
+        	
+        	
+        	
         }
-
-        if (in.hasDetectedIssue()) {
-            List<Reference> issueReferences = in.getDetectedIssue();
-            out.setIssues(handleIssues(issueReferences, ctx));
-        }
-
-        if (in.hasRequester()) {
-            out.setRequestedBy(NameResolver.getReferenceName(in.getRequester(),ctx));
-        }
-        */
+        
+        out.setNotes(sb.toString());
+        
         return out;
     }
+
+   
     public void handleReasonReference(List<Reference> reasonRefs, StringBuilder reasons, Context ctx) {
         for (Reference r : reasonRefs) {
             if (r.hasDisplay()) {

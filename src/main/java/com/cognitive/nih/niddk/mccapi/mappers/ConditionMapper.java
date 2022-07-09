@@ -74,6 +74,10 @@ public class ConditionMapper implements IConditionMapper {
         }
         out.setCategoriesList(in.getCategory());
         out.setCode(mapper.fhir2local(in.getCode(),ctx));
+        
+        out.setNote(FHIRHelper.annotationsToString(in.getNote(),ctx));
+        System.err.println(out.getNote());
+        
         return out;
     }
 

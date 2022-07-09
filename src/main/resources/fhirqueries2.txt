@@ -39,9 +39,6 @@ Observation.QueryValueSetExpanded.combo=/Observation?subject={subject}&combo-cod
 Observation.QueryValueSetExpanded.component=/Observation?subject={subject}&component-code={codes}&_sort=-date&_count={count}
 Observation.QueryValueSetExpanded.panel=/Observation?subject={subject}&code={codes}&_sort=-date&_count={count}
 
-Observation.Query.category=/Observation?subject={subject}&category={category}&_sort=-date&_count={count}
-
-
 #Goal
 Goal.Query=/Goal?subject={subject}
 Goal.Lookup=/Goal/{id}

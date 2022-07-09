@@ -5,7 +5,7 @@ import com.cognitive.nih.niddk.mccapi.mappers.IMedicationMapper;
 import com.cognitive.nih.niddk.mccapi.mappers.MedicationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.MedicationStatement;
+ 
 
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
@@ -77,37 +77,7 @@ public class MedicationLists {
         return inactiveMedications.toArray(out);
     }
 
-    public void addMedicationStatement(MedicationStatement ms,  Context ctx)
-    {
-        MccMedicationRecord mr = ctx.getMapper().fhir2local(ms,ctx);
-        String status = mr.getStatus();
-        Integer s = activeMedStmtKeys.get(status);
-        if (s != null) {
-            int active = s.intValue();
-
-            switch (active) {
-                case ACTIVE_LIST: {
-                    activeMedications.add(mr);
-                    break;
-                }
-                case INACTIVE_LIST: {
-                    inactiveMedications.add(mr);
-                    break;
-                }
-                case IGNORE: {
-                    log.debug("Ignoring status ");
-                    break;
-                }
-                default: {
-                    log.debug("Code error - Unhandled status swithc");
-                }
-            }
-        }
-        else
-        {
-            log.warn("Unknown Medication Status: "+status);
-        }
-    }
+   
 
     public void addMedicationRequest(MedicationRequest mreq,    Context ctx)
     {

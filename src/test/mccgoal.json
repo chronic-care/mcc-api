@@ -1,0 +1,53 @@
+{
+	"priority": "high-priority",
+	"description": "description",
+	"lifecycleStatus": "proposed",
+	"addresses": "addressses",
+	"acceptance": "aaa",
+	"targets": [
+		{
+			"measure": {
+				"coding": [
+					{
+						"display": "goalMeasure"
+					}
+				],
+				"text": "goalMeasure"
+			},
+			"dueAsText": "DUEASTTEXT"
+		}
+	],
+	"statusDate": "2022-01-01",
+	"categories": [
+		{
+			"coding": [
+				{
+					"display": "categories"
+				}
+			],
+			"text": "categories"
+		}
+	],
+	"useStartConcept": false,
+	"startConcept": {
+		"coding": [
+			{
+				"display": "StartConcept"
+			}
+		],
+		"text": "StartConcept"
+	},
+	"notes": [
+		"notes"
+	],
+	"outcomeCodes": [
+		{
+			"coding": [
+				{
+					"display": "outcomes"
+				}
+			],
+			"text": "outcomes"
+		}
+	]
+}

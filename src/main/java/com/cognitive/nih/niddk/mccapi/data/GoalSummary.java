@@ -27,4 +27,25 @@ class GoalSummary {
     private String expressedBy;
     private String acceptance;
     private GoalTarget[] targets;
+   
+   
+
+    private String statusDate;
+    private String statusReason;
+    @NotBlank
+   
+    private String categorySummary;
+    
+    private MccCodeableConcept[] categories;
+    
+    private boolean useStartConcept;
+   
+    private MccCodeableConcept startConcept;
+   
+    
+    private String[] notes;
+    private MccCodeableConcept[] outcomeCodes;
+    private String outcomeReference;
+    private String server;
+//    private Acceptance acceptance[];
 }

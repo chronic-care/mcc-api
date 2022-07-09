@@ -68,6 +68,8 @@ public class ObservationMapper implements IObservationMapper {
 			} else if (in.hasEffectivePeriod()) {
 				effective.setPeriod(mapper.fhir2local(in.getEffectivePeriod(), ctx));
 			}
+		} else {
+			out.defineEffective();
 		}
 		if (in.hasValue()) {
 			out.setValue(mapper.fhir2local(in.getValue(), ctx));

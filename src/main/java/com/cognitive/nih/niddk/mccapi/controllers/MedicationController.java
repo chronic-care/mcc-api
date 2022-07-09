@@ -57,20 +57,7 @@ public class MedicationController {
                 }
             }
         }
-
-        callUrl = queryManager.setupQuery("MedicationStatement.Query", values, webRequest);
-        if (callUrl != null) {
-            Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
-            //results = client.search().forResource(MedicationStatement.class).where(MedicationStatement.SUBJECT.hasId(subjectId))
-            //        .returnBundle(Bundle.class).execute();
-
-            for (Bundle.BundleEntryComponent e : results.getEntry()) {
-                if (e.getResource().fhirType().compareTo("MedicationStatement") == 0) {
-                    MedicationStatement ms = (MedicationStatement) e.getResource();
-                    out.addMedicationStatement(ms, ctx);
-                }
-            }
-        }
+ 
         return out;
     }
 
@@ -126,13 +113,7 @@ public class MedicationController {
             if (mr != null) {
                 out = mapper.fhir2local(mr, ctx);
             }
-        } else if (type.compareTo("MedicationStatement") == 0) {
-            //DIRECT-FHIR-REF
-            MedicationStatement ms = client.fetchResourceFromUrl(MedicationStatement.class, id);
-            if (ms != null) {
-                out = mapper.fhir2local(ms, ctx);
-            }
-        }
+        }  
         return out;
     }
 
@@ -162,19 +143,7 @@ public class MedicationController {
             }
         }
 
-        callUrl = queryManager.setupQuery("MedicationStatement.Query", values, webRequest);
-        if (callUrl != null) {
-            Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
-            //results = client.search().forResource(MedicationStatement.class).where(MedicationStatement.SUBJECT.hasId(subjectId))
-            //        .returnBundle(Bundle.class).execute();
-
-            for (Bundle.BundleEntryComponent e : results.getEntry()) {
-                if (e.getResource().fhirType().compareTo("MedicationStatement") == 0) {
-                    MedicationStatement ms = (MedicationStatement) e.getResource();
-                    out.addMedicationStatement(ms, ctx);
-                }
-            }
-        }
+      
         return out;
     }
 

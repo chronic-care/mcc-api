@@ -17,5 +17,5 @@ services:
       xCLIENT_ID : 2a717f1b-9d4f-405e-848b-656902abe6be
       API_SERVER : mccservices:8081
     ports:
-      - "4200:80"
+      - "80:80"
     restart: always

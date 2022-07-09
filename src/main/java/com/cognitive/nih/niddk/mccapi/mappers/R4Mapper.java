@@ -140,7 +140,7 @@ public class R4Mapper implements IR4Mapper {
     }
 
     @Override
-    public MccGoal fhir2local(Goal in, Context ctx) {
+    public GoalSummary fhir2local(Goal in, Context ctx) {
         return goalMapper.fhir2local(in,ctx);
     }
 
@@ -159,20 +159,14 @@ public class R4Mapper implements IR4Mapper {
         return medicationMapper.fhir2local(in,ctx);
     }
 
-    @Override
-    public MccMedicationRecord fhir2local(MedicationStatement in, Context ctx) {
-        return medicationMapper.fhir2local(in,ctx);
-    }
+    
 
     @Override
     public MedicationSummary fhir2summary(MedicationRequest in, Context ctx) {
         return medicationMapper.fhir2summary(in,ctx);
     }
 
-    @Override
-    public MedicationSummary fhir2summary(MedicationStatement in, Context ctx) {
-        return medicationMapper.fhir2summary(in,ctx);
-    }
+   
 
     @Override
     public MccObservation fhir2local(Observation in, Context ctx) {

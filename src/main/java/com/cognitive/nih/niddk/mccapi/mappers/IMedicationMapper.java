@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.MedicationStatement;
 
 public interface IMedicationMapper {
     MccMedicationRecord fhir2local(MedicationRequest in, Context ctx);
-    MccMedicationRecord fhir2local(MedicationStatement in, Context ctx);
+   
     MedicationSummary fhir2summary(MedicationRequest in, Context ctx);
-    MedicationSummary fhir2summary(MedicationStatement in, Context ctx);
+   
 }

@@ -25,6 +25,9 @@ public class FHIRServerManager {
 	@Value("${FHIRIO_SERVER}")
 	private String fhirIOServerAddress;
 
+	@Value("${SECONDARY_SERVER}")
+	private String secondaryServerAddress;
+
 	@Value("${fhir.connect.timeout:30000}")
 	private String connectTimeout;
 	@Value("${fhir.request.timeout:30000}")
@@ -48,7 +51,12 @@ public class FHIRServerManager {
 
 	private FHIRServer fhirIOServer;
 
+	private FHIRServer secondaryServer;
+
 	public LoggingInterceptor getLoggingInterceptor() {
+		if (loggingInterceptor == null) {
+			loggingInterceptor = new LoggingInterceptor();
+		}
 		return loggingInterceptor;
 	}
 
@@ -87,6 +95,8 @@ public class FHIRServerManager {
 	private void createServers() {
 		defaultFHIRServer = defineDefaultServers("MMC eCarePlan Test", "MCCeCarePlanTest", defaultFHIRServerAddress);
 		fhirIOServer = defineDefaultServers("MMC eCarePlan FHIR IO Server", "FHIRIOServer", fhirIOServerAddress);
+		secondaryServer = defineDefaultServers("MMC eCarePlan Secondary Server", "SecondaryServer", secondaryServerAddress);
+
 	}
 
 	private FHIRServer defineDefaultServers(String name, String id, String fhirAddress) {
@@ -138,5 +148,9 @@ public class FHIRServerManager {
 		return srv;
 
 	}
+
+    public FHIRServer getSecondaryServer() {
+        return secondaryServer;
+    }
 
 }

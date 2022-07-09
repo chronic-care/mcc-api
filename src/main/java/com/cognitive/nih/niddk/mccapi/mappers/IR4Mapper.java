@@ -25,13 +25,13 @@ public interface IR4Mapper {
     EducationSummary fhir2EducationSummary(Procedure in, Context ctx);
     Education fhir2localAsEducation(ServiceRequest in, Context ctx);
     EducationSummary fhir2EducationSummary(ServiceRequest in, Context ctx);
-    MccGoal fhir2local(Goal in, Context ctx);
+    GoalSummary fhir2local(Goal in, Context ctx);
     GoalSummary fhir2summary(Goal in, Context ctx);
     GoalTarget fhir2local(Goal.GoalTargetComponent in, Context ctx);
     MccMedicationRecord fhir2local(MedicationRequest in, Context ctx);
-    MccMedicationRecord fhir2local(MedicationStatement in, Context ctx);
+    
     MedicationSummary fhir2summary(MedicationRequest in, Context ctx);
-    MedicationSummary fhir2summary(MedicationStatement in, Context ctx);
+   
     MccObservation fhir2local(Observation in, Context ctx);
     ObservationComponent fhir2local(Observation.ObservationComponentComponent in, Context ctx);
     Contact fhir2Contact(Organization in, Context ctx);

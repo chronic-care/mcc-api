@@ -105,18 +105,7 @@ public class NameResolver {
         }
         return out;
     }
-    public static String getName(@NonNull MedicationStatement in, Context ctx) {
-        String out = "Unresolvable Medication Statement";
-        if (in.hasMedication()) {
-            if (in.hasMedicationCodeableConcept()) {
-                out = in.getMedicationCodeableConcept().getText();
-            }
-            if (in.hasMedicationReference()) {
-                out = getReferenceName(in.getMedicationReference(), ctx);
-            }
-        }
-        return out;
-    }
+    
 
 
     public static String getReferenceName(Reference ref, Context ctx) {
@@ -138,11 +127,7 @@ public class NameResolver {
                     out = x != null ? getName(x, ctx) : "Missing " + type;
                     break;
                 }
-                case "MedicationStatement": {
-                    MedicationStatement x = ReferenceResolver.findMedicationStatement(ref, ctx);
-                    out = x != null ? getName(x, ctx) : "Missing " + type;
-                    break;
-                }
+                
                 case "NutritionOrder": {
                     NutritionOrder x = ReferenceResolver.findNutritionOrder(ref, ctx);
                     out = x != null ? getName(x, ctx) : "Missing " + type;

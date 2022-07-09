@@ -79,38 +79,7 @@ public class MedicationSummaryList {
         return inactiveMedications.toArray(out);
     }
 
-    public void addMedicationStatement(MedicationStatement ms,  Context ctx)
-    {
-        MedicationSummary mr = ctx.getMapper().fhir2summary(ms,ctx);
-        String status = mr.getStatus();
-        Integer s = activeMedStmtKeys.get(status);
-        if (s != null) {
-            int active = s.intValue();
-
-            switch (active) {
-                case ACTIVE_LIST: {
-                    activeMedications.add(mr);
-                    break;
-                }
-                case INACTIVE_LIST: {
-                    inactiveMedications.add(mr);
-                    break;
-                }
-                case IGNORE: {
-                    log.debug("Ignoring status ");
-                    break;
-                }
-                default: {
-                    log.debug("Code error - Unhandled status switch");
-                }
-            }
-        }
-        else
-        {
-            log.warn("Unknown Medication Statement Status: "+status);
-        }
-    }
-
+    
     public void addMedicationRequest(MedicationRequest mreq,  Context ctx)
     {
         MedicationSummary mr = ctx.getMapper().fhir2summary(mreq,ctx);

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class MedicationSummary {
     @NotBlank
-    private String type;  //MedicationStatement or MedicationRequest
+    private String type;  //  or MedicationRequest
     @NotBlank
     private String fhirId;
     private Boolean inConflict;
@@ -26,4 +26,10 @@ public class MedicationSummary {
     private String issues;
     private String priority;
     private String onCareplans;
+    private String effectiveDate;
+    private String refillsPermitted;
+    private String frequency;
+    private String method;
+    private String notes;
+
 }

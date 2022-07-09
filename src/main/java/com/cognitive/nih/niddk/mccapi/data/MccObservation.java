@@ -53,9 +53,15 @@ class MccObservation {
 
         @Override
         public int compareTo(Object o) {
+        	if (true) {
+        		return 0;
+        	}
             if (o instanceof Effective)
             {
                 Effective in = (Effective) o;
+                if (in.type == null) {
+                	return 0;
+                }
                 if (in.type.compareTo(this.type)==0)
                 {
                     switch(type)

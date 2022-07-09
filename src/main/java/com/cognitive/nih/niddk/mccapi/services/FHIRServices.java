@@ -42,6 +42,9 @@ public class FHIRServices {
 
 		if (headers.containsKey("mcc-fhir-server")) {
 			String server = headers.get("mcc-fhir-server");
+			// if (server != null && server.equals("https://ocp.fhir4.ocp-nonprod.net:8082/fhir")) {
+				// server = "https://test-ocp.mynjinck.com:443/fhir";
+			// }
 			log.info("Server is " + server);
 			client = stu4Context.newRestfulGenericClient(server);
 			if (headers.containsKey("mcc-token")) {
@@ -59,6 +62,27 @@ public class FHIRServices {
 		return client;
 	}
 
+
+	public IGenericClient getClientSecondaryServer(Map<String, String> headers) {
+		IGenericClient client = null;
+		FHIRServerManager srvMgr = FHIRServerManager.getManager();
+		if (headers.containsKey("mcc-secondaryfhir-server")) {
+			String server = headers.get("mcc-secondaryfhir-server");
+ 			log.info("Server is " + server);
+			client = stu4Context.newRestfulGenericClient(server);
+			if (headers.containsKey("mcc-token")) {
+				BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(headers.get("mcc-token"));
+				client.registerInterceptor(authInterceptor);
+			}
+			if (srvMgr.isEnableFHIRLogging()) {
+				client.registerInterceptor(srvMgr.getLoggingInterceptor());
+			}
+		} else {
+			log.warn("No Secondary Server provided");
+		}
+		
+		return client;
+	}
 	public IGenericClient getIOClient() {
 		IGenericClient client;
 		FHIRServerManager srvMgr = FHIRServerManager.getManager();
@@ -68,9 +92,27 @@ public class FHIRServices {
 		stu4Context.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		client = stu4Context.newRestfulGenericClient(srv.getBaseURL());
 
-		if (srvMgr.isEnableFHIRLogging()) {
+//		if (srvMgr.isEnableFHIRLogging()) {
 			client.registerInterceptor(srvMgr.getLoggingInterceptor());
-		}
+//		}
 		return client;
 	}
+///**
+// * This is to mimic multiple endpoints similar to facade
+// * @return
+// */
+//	public IGenericClient getSecondaryServer() {
+//		IGenericClient client;
+//		FHIRServerManager srvMgr = FHIRServerManager.getManager();
+//
+//		FHIRServer srv = srvMgr.getSecondaryServer();
+//		
+//		stu4Context.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+//		client = stu4Context.newRestfulGenericClient(srv.getBaseURL());
+//
+//		if (srvMgr.isEnableFHIRLogging()) {
+//			client.registerInterceptor(srvMgr.getLoggingInterceptor());
+//		}
+//		return client;
+//	}
 }

@@ -32,8 +32,17 @@ public class ConditionHistory implements Comparable<ConditionHistory> {
     private FuzzyDate onsetDate;
     private FuzzyDate abatementDate;
     private Date recorded;
+    private String note;
 
-    @Override
+    public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	@Override
     public int compareTo(ConditionHistory o) {
         if (onsetDate != null && o.onsetDate != null)
         {

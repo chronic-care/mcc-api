@@ -1,41 +1,56 @@
 /*Copyright 2021 Cognitive Medical Systems*/
 package com.cognitive.nih.niddk.mccapi.controllers;
 
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.cognitive.nih.niddk.mccapi.data.Context;
-import com.cognitive.nih.niddk.mccapi.data.Demographics;
-import com.cognitive.nih.niddk.mccapi.data.MccGoal;
-import com.cognitive.nih.niddk.mccapi.data.MccObservation;
-import com.cognitive.nih.niddk.mccapi.data.MccValueSet;
-import com.cognitive.nih.niddk.mccapi.data.primative.*;
-import com.cognitive.nih.niddk.mccapi.exception.ItemNotFoundException;
-import com.cognitive.nih.niddk.mccapi.managers.ContextManager;
-import com.cognitive.nih.niddk.mccapi.managers.QueryManager;
-import com.cognitive.nih.niddk.mccapi.managers.ValueSetManager;
-import com.cognitive.nih.niddk.mccapi.mappers.GoalMapper;
-import com.cognitive.nih.niddk.mccapi.mappers.IR4Mapper;
-import com.cognitive.nih.niddk.mccapi.mappers.ObservationMapper;
-import com.cognitive.nih.niddk.mccapi.services.FHIRServices;
-import com.cognitive.nih.niddk.mccapi.util.MccHelper;
-import com.cognitive.nih.niddk.mccapi.util.UCUMHelper;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.annotation.PostConstruct;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
-import java.math.BigDecimal;
-import java.util.*;
+import com.cognitive.nih.niddk.mccapi.data.Context;
+import com.cognitive.nih.niddk.mccapi.data.Demographics;
+import com.cognitive.nih.niddk.mccapi.data.MccObservation;
+import com.cognitive.nih.niddk.mccapi.data.MccValueSet;
+import com.cognitive.nih.niddk.mccapi.data.primative.GenericType;
+import com.cognitive.nih.niddk.mccapi.data.primative.MccCodeableConcept;
+import com.cognitive.nih.niddk.mccapi.data.primative.MccQuantity;
+import com.cognitive.nih.niddk.mccapi.data.primative.MccReference;
+import com.cognitive.nih.niddk.mccapi.data.primative.ObservationCollection;
+import com.cognitive.nih.niddk.mccapi.exception.ItemNotFoundException;
+import com.cognitive.nih.niddk.mccapi.managers.ContextManager;
+import com.cognitive.nih.niddk.mccapi.managers.QueryManager;
+import com.cognitive.nih.niddk.mccapi.managers.ValueSetManager;
+import com.cognitive.nih.niddk.mccapi.mappers.IR4Mapper;
+import com.cognitive.nih.niddk.mccapi.mappers.ObservationMapper;
+import com.cognitive.nih.niddk.mccapi.services.FHIRServices;
+import com.cognitive.nih.niddk.mccapi.util.MccHelper;
+import com.cognitive.nih.niddk.mccapi.util.UCUMHelper;
+
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -645,6 +660,41 @@ public class ObservationController {
         outA = out.toArray(outA);
         return outA;
     }
+    
+    
+    @GetMapping("/observationsbycategory")
+    public MccObservation[] getObservationsByCategory(@RequestParam(required = true, name = "subject") String subjectId, @RequestParam(required = true, name = "category") String category, @RequestParam(name = "max", defaultValue = "100") int maxItems, @RequestParam(name = "sort", defaultValue = "ascending") String sortOrder, @RequestParam(name = "mode", defaultValue = "code") String mode, @RequestParam(required = false, name = "requiredunit") String unit, @RequestHeader Map<String, String> headers, WebRequest webRequest) {
+
+        if (bLogCalls) {
+            log.info("Get: /observationsbycategory " + subjectId + ", for valueset " + category);
+        }
+
+
+        List<MccObservation> out = new ArrayList<>();
+        FHIRServices fhirSrv = FHIRServices.getFhirServices();
+        IGenericClient client = fhirSrv.getClient(headers);
+
+            Map<String, String> values = new HashMap<>();
+            values.put("count", Integer.toString(maxItems));
+            values.put("category", category);
+            String baseQuery = "Observation.Query";
+            out = this.QueryObservations(baseQuery, "category", client, subjectId, sortOrder, unit, webRequest, headers, values);
+
+        if (bLogCalls) {
+            log.info("/observationsbycategory found " + category + "  = "+ out.size() + " items");
+        }
+        if (out.size() > maxItems) {
+            out = out.subList(0, maxItems - 1);
+        }
+        MccObservation[] outA = new MccObservation[out.size()];
+        outA = out.toArray(outA);
+        return outA;
+    }
+
+    
+    
+    
+    
 
     @GetMapping("/observationssegmented")
     public ObservationCollection getObservationsSegmented(@RequestParam(required = true, name = "subject") String subjectId, @RequestParam(required = true, name = "valueset") String valueset, @RequestParam(name = "max", defaultValue = "1000") int maxItems, @RequestParam(name = "sort", defaultValue = "ascending") String sortOrder, @RequestParam(name = "mode", defaultValue = "code") String mode, @RequestParam(required = false, name = "requiredunit") String unit, @RequestHeader Map<String, String> headers, WebRequest webRequest) {

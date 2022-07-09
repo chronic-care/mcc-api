@@ -16,6 +16,13 @@ public @Data class MccCodeableConcept implements MccType {
     @NotBlank
     private String text;
 
+    public MccCodeableConcept() {
+        
+    }
+    public MccCodeableConcept(String text) {
+        this.text = text;
+    }
+
     @JsonIgnore
     public String getKey(String defSystem)
     {

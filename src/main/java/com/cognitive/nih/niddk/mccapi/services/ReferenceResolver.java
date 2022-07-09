@@ -233,20 +233,7 @@ public class ReferenceResolver {
         return out;
     }
 
-    public static MedicationStatement findMedicationStatement(Reference ref, Context ctx) {
-        MedicationStatement out = null;
-        if (FHIRHelper.isReferenceOfType(ref, "MedicationStatement"))
-        {
-            try {
-                //DIRECT-FHIR-REF
-                out = ctx.getClient().fetchResourceFromUrl(MedicationStatement.class, ref.getReference());
-                checkOutput(out,ref);
-            } catch (Exception e) {
-                logReferenceException(ref,e);
-            }
-        }
-        return out;
-    }
+    
 
     public static NutritionOrder findNutritionOrder(Reference ref, Context ctx) {
         NutritionOrder out = null;

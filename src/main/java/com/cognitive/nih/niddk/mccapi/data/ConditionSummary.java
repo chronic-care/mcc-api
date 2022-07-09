@@ -22,6 +22,7 @@ public class ConditionSummary {
     private Date firstRecorded;
     private String firstRecordedAsText;
     private ConditionHistory mostRecentValid = null;
+    private String note;
 
 
     public ConditionSummary() {
@@ -176,4 +177,6 @@ public class ConditionSummary {
         }
         return null;
     }
+
+   
 }
