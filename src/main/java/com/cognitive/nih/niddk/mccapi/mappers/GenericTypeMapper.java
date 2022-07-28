@@ -259,7 +259,7 @@ public class GenericTypeMapper implements IGenericTypeMapper {
 
     public MccSampledData fhir2local(SampledData in, Context ctx) {
         MccSampledData out = new MccSampledData();
-        out.setOrigin(fhir2local((SimpleQuantity) in.getOrigin(), ctx));
+        out.setOrigin(fhir2local((Quantity) in.getOrigin(), ctx));
         out.setData(in.getData());
         out.setDimensions(in.getDimensions());
         out.setFactor(in.getFactor());

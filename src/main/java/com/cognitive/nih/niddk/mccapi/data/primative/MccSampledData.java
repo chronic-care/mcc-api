@@ -12,7 +12,7 @@ class MccSampledData {
 
     public static final String fhirType = "SampledData";
 
-    private MccSimpleQuantity origin;
+    private MccQuantity origin;
     private BigDecimal period; //decimal
     private BigDecimal factor; //decimal
     private BigDecimal lowerlimit; //decimal
