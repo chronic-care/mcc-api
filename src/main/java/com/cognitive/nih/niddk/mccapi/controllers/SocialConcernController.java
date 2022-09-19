@@ -106,51 +106,22 @@ public class SocialConcernController {
         IGenericClient client = fhirSrv.getClient(headers);
 
         Context ctx = contextManager.setupContext(subjectId, client, mapper, headers);
-        //TODO: Query for concerns
-        //Bundle results = client.search().forResource(CarePlan.class).where(CarePlan.SUBJECT.hasId(subjectId))
-        //        .returnBundle(Bundle.class).execute();
-        //for (Bundle.BundleEntryComponent e : results.getEntry()) {
-        //    if (e.getResource().fhirType() == "CarePlan") {
-        //        CarePlan c = (CarePlan) e.getResource();
-        //        out.add(mapCarePlan(c, client, ctx));
-        //    }
-        //}
-        /*
-        out.add(new SocialConcern("Food Security"));
-        out.add(new SocialConcern("Transportation Access"));
-        out.add(new SocialConcern("Housing Stability"));
-        out.add(new SocialConcern("Primary Language"));
-        out.add(new SocialConcern("Health Insurance Status/Type"));
-        out.add(new SocialConcern("History of Abuse"));
-        out.add(new SocialConcern("Computer/Phone Access"));
-        out.add(new SocialConcern("Alcohol Abuse"));
-        out.add(new SocialConcern("Substance Abuse"));
-        out.add(new SocialConcern("Caregiver Characteristics"));
-        out.add(new SocialConcern("Characteristic of Home Environment"));
-        out.add(new SocialConcern("Employment Status"));
-        out.add(new SocialConcern("Education Level"));
-        out.add(new SocialConcern("Environmental Conditions"));
-`       */
-        MccValueSet valueSet = ValueSetManager.getValueSetManager().findValueSet(valueSetId);
+         MccValueSet valueSet = ValueSetManager.getValueSetManager().findValueSet(valueSetId);
         ConditionLists concerns = new ConditionLists();
 
         Map<String, String> values = new HashMap<>();
         String callUrl = null;
         if (bUseCategory)
         {
-            callUrl = queryManager.setupQuery("Condition.QueryHealthConcerns.ByCategory", values, webRequest);
+            callUrl = queryManager.setupQuery("Condition.QueryHealthConcerns.ByCategoryxxx", values, webRequest);
         }
         else if (bUseValueSet)
         {
-            callUrl = queryManager.setupQuery("Condition.QueryHealthConcerns.ForValueSet", values, webRequest);
+            callUrl = queryManager.setupQuery("Condition.QueryHealthConcerns.ForValueSetxxx", values, webRequest);
         }
 
         if (callUrl != null) {
             Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
-
-            ///Bundle results = client.search().forResource(Condition.class).where(Condition.SUBJECT.hasId(subjectId))
-            //    .and(Condition.CATEGORY.exactly().code("health-concern")).returnBundle(Bundle.class).execute();
-
             for (Bundle.BundleEntryComponent e : results.getEntry()) {
                 if (e.getResource().fhirType().compareTo("Condition")==0) {
                     Condition c = (Condition) e.getResource();
@@ -169,6 +140,35 @@ public class SocialConcernController {
                 }
             }
         }
+        
+        if (bUseCategory)
+        {
+            callUrl = queryManager.setupQuery("Condition.QueryHealthConcerns.ByCategory2", values, webRequest);
+            
+            if (callUrl != null) {
+                Bundle results = client.fetchResourceFromUrl(Bundle.class, callUrl);
+                for (Bundle.BundleEntryComponent e : results.getEntry()) {
+                    if (e.getResource().fhirType().compareTo("Condition")==0) {
+                        Condition c = (Condition) e.getResource();
+//                        if (bUseValueSet)
+//                        {
+//                            //Verify the condition is in the value set
+//                            if (c.hasCode()) {
+//                                if (!MCC2FHIRHelper.conceptInValueSet(c.getCode(),valueSet))
+//                                {
+//                                    //Skip - this concept is not one we consider to be a referral
+//                                    continue;
+//                                }
+//                            }
+//                        }
+                        addCondtionToConditionList(concerns, c, ctx);
+                    }
+                }
+            }
+        }
+        
+        
+        
         concerns.categorizeConditions(bUseCategory, bUseValueSet, valueSet);
         SocialConcern[] outA = new SocialConcern[out.size()];
         for (ConditionSummary s : concerns.getActiveConcerns())

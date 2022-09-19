@@ -19,6 +19,7 @@ public class R4Mapper implements IR4Mapper {
     private final IConditionMapper conditionMapper;
     private final ICounselingMapper counselingMapper;
     private final IEducationMapper educationMapper;
+    private final IServiceRequestMapper serviceRequestMapper;
     private final IGenericTypeMapper genericTypeMapper;
     private final IGoalMapper goalMapper;
     private final IMedicationMapper medicationMapper;
@@ -35,7 +36,7 @@ public class R4Mapper implements IR4Mapper {
     private final ICodingMapper codingMapper;
 
 
-    public R4Mapper(IFHIRNormalizer fhirNormalizer, ICareplanMapper careplanMapper, ICareTeamMapper careTeamMapper, ICodeableConceptMapper codeableConceptMapper, IConditionMapper conditionMapper, ICounselingMapper counselingMapper, IEducationMapper educationMapper, IGenericTypeMapper genericTypeMapper, IGoalMapper goalMapper, IMedicationMapper medicationMapper, IObservationMapper observationMapper, IOrganizationMapper organizationMapper, IPatientMapper patientMapper, IPractitionerMapper practitionerMapper, IPractitionerRoleMapper practitionerRoleMapper, IProcedureMapper procedureMapper, IQuestionnaireResponseMapper questionnaireResponseMapper, IReferenceMapper referenceMapper, IReferralMapper referralMapper, IRelatedPersonMapper relatedPersonMapper, ICodingMapper codingMapper) {
+    public R4Mapper(IFHIRNormalizer fhirNormalizer, ICareplanMapper careplanMapper, ICareTeamMapper careTeamMapper, ICodeableConceptMapper codeableConceptMapper, IConditionMapper conditionMapper, ICounselingMapper counselingMapper, IEducationMapper educationMapper, IGenericTypeMapper genericTypeMapper, IGoalMapper goalMapper, IMedicationMapper medicationMapper, IObservationMapper observationMapper, IOrganizationMapper organizationMapper, IPatientMapper patientMapper, IPractitionerMapper practitionerMapper, IPractitionerRoleMapper practitionerRoleMapper, IProcedureMapper procedureMapper, IQuestionnaireResponseMapper questionnaireResponseMapper, IReferenceMapper referenceMapper, IReferralMapper referralMapper, IRelatedPersonMapper relatedPersonMapper, ICodingMapper codingMapper, IServiceRequestMapper serviceRequestMapper) {
         this.fhirNormalizer = fhirNormalizer;
         this.careplanMapper = careplanMapper;
         this.careTeamMapper = careTeamMapper;
@@ -43,6 +44,7 @@ public class R4Mapper implements IR4Mapper {
         this.conditionMapper = conditionMapper;
         this.counselingMapper = counselingMapper;
         this.educationMapper = educationMapper;
+		this.serviceRequestMapper = serviceRequestMapper;
         this.genericTypeMapper = genericTypeMapper;
         this.goalMapper = goalMapper;
         this.medicationMapper = medicationMapper;
@@ -57,6 +59,7 @@ public class R4Mapper implements IR4Mapper {
         this.referralMapper = referralMapper;
         this.relatedPersonMapper = relatedPersonMapper;
         this.codingMapper = codingMapper;
+//        this.serviceRequestMapper = serviceRequestMapper; 
     }
 
     @Override
@@ -419,4 +422,9 @@ public class R4Mapper implements IR4Mapper {
     {
         return patientMapper.fhir2Demographics(in,ctx);
     }
+
+	@Override
+	public ServiceRequestSummary fhir2ServiceRequestSummary(ServiceRequest p, Context ctx) {
+		return serviceRequestMapper.fhir2summary(p, ctx);
+	}
 }

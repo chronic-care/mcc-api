@@ -24,6 +24,7 @@ import com.cognitive.nih.niddk.mccapi.data.Acceptance;
 import com.cognitive.nih.niddk.mccapi.data.Context;
 import com.cognitive.nih.niddk.mccapi.data.GoalSummary;
 import com.cognitive.nih.niddk.mccapi.data.GoalTarget;
+import com.cognitive.nih.niddk.mccapi.data.MccGoalRelationship;
 import com.cognitive.nih.niddk.mccapi.data.primative.MccCodeableConcept;
 import com.cognitive.nih.niddk.mccapi.data.primative.MccCoding;
 import com.cognitive.nih.niddk.mccapi.data.primative.MccReference;
@@ -36,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class GoalMapper implements IGoalMapper {
 
+	private static String RELATEDGOALS = "http://hl7.org/fhir/StructureDefinition/goal-relationship";
+
 	private static Logger logger = LoggerFactory.getLogger(GoalMapper.class);
 
 	public GoalSummary fhir2local(Goal in, Context ctx) {
@@ -46,8 +49,46 @@ public class GoalMapper implements IGoalMapper {
 		out.setDescription(in.getDescription().getText());
 		out.setOutcomeCodes(mapper.fhir2local(in.getOutcomeCode(), ctx));
 		if (in.hasAddresses()) {
-			out.setAddresses(mapper.fhir2local(in.getAddresses().get(0), ctx).getDisplay());
+			MccReference[] mccReferences = new MccReference[in.getAddresses().size()];
+			int mccCtr = 0;
+			for (Reference addresses : in.getAddresses()) {
+				mccReferences[mccCtr++] = mapper.fhir2local(addresses, ctx);
+			}
+
 		}
+
+		if (in.hasAddresses()) {
+			MccReference[] mccReferences = new MccReference[in.getAddresses().size()];
+			int mccCtr = 0;
+			for (Reference addresses : in.getAddresses()) {
+				mccReferences[mccCtr++] = mapper.fhir2local(addresses, ctx);
+			}
+
+		}
+
+		List<Extension> relationships = in.getExtensionsByUrl(RELATEDGOALS);
+		if (!relationships.isEmpty()) {
+			MccGoalRelationship[] relatedGoals = new MccGoalRelationship[relationships.size()];
+			int mccCtr = 0;
+			for (Extension relationship : relationships) {
+				Extension type = relationship.getExtensionByUrl("type");
+				CodeableConcept valueCodeableConcept = (CodeableConcept) type.getValue();
+				Extension target = relationship.getExtensionByUrl("target");
+				Reference valueReference = (Reference) target.getValue();
+				MccGoalRelationship relatedGoal = new MccGoalRelationship();
+				MccReference relatedGoalTarget = new MccReference();
+				relatedGoalTarget.setDisplay(valueCodeableConcept.getText());
+				relatedGoal.setTarget(relatedGoalTarget);
+				MccCodeableConcept relatedGoalType = new MccCodeableConcept();
+				relatedGoalType.setText(valueReference.getDisplay());
+				relatedGoal.setType(relatedGoalType);
+				relatedGoals[mccCtr++] = relatedGoal;
+
+			}
+		}
+
+//		List<Extension> acc = in.getExtensionsByUrl(RELATEDGOALS);
+
 		out.setCategories(mapper.fhir2local(in.getCategory(), ctx));
 		out.setCategorySummary(FHIRHelper.getConceptsAsDisplayString(in.getOutcomeCode()));
 		if (in.hasExpressedBy()) {
@@ -87,19 +128,11 @@ public class GoalMapper implements IGoalMapper {
 			out.setTargets(outTargets);
 		}
 
-		// http://hl7.org/fhir/StructureDefinition/goal-acceptance
-		logger.error("in.getExtensionsByUrl(\"http://hl7.org/fhir/StructureDefinition/goal-acceptance\")");
+		
+		
 		List<Extension> acc = in.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/goal-acceptance");
 		if (acc != null && acc.size() > 0) {
-			logger.error("found");
-			logger.error("found");
-			logger.error("found");
-			logger.error("found");
-			logger.error("found");
-			logger.error("found");
-			Acceptance[] acceptances = new Acceptance[acc.size()];
-			int cnt = 0;
-			for (Extension e : acc) {
+ 			for (Extension e : acc) {
 
 				logger.error("loop " + e.getUrl());
 
@@ -122,12 +155,8 @@ public class GoalMapper implements IGoalMapper {
 					Base b = p.get(0).getValue();
 					a.setPriority(mapper.fhir2local(b.castToCodeableConcept(b), ctx));
 				}
-				acceptances[cnt] = a;
-				cnt++;
-			}
-
-			if (acceptances[0].getIndividual() != null) {
-				out.setAcceptance(acceptances[0].getIndividual().getDisplay());
+				out.setAcceptance(a);
+				break;
 			}
 
 		}
@@ -152,12 +181,6 @@ public class GoalMapper implements IGoalMapper {
 
 		if (in.getDescription() != null) {
 			CodeableConcept cc = new CodeableConcept();
-//			if (in.getDescription().getCoding() != null) {
-//				for (MccCoding mcccode : in.getDescription().getCoding()) {
-//					cc.addCoding().setCode(mcccode.getCode()).setSystem(mcccode.getSystem())
-//							.setDisplay(mcccode.getDisplay());
-//				}
-//			}	
 			cc.setText(in.getDescription());
 			out.setDescription(cc);
 		}
@@ -174,11 +197,10 @@ public class GoalMapper implements IGoalMapper {
 		}
 
 		if (in.getAddresses() != null) {
-//			for (MccReference addr : in.getAddresses()) {
-			out.addAddresses().setDisplay(in.getAddresses());
-//				.setReference(addr.getReference())
-//						.setType(addr.getType());
-//			}
+			for (MccReference addr : in.getAddresses()) {
+				out.addAddresses().setDisplay(addr.getDisplay()).setReference(addr.getReference())
+						.setType(addr.getType());
+			}
 		}
 
 		if (in.getCategories() != null) {
@@ -244,6 +266,10 @@ public class GoalMapper implements IGoalMapper {
 			for (GoalTarget gt : in.getTargets()) {
 				CodeableConcept cc4 = new CodeableConcept();
 				cc4.setText(gt.getMeasure().getText());
+				for (MccCoding coding: gt.getMeasure().getCoding()) {
+					cc4.addCoding().setCode(coding.getCode()).setDisplay(coding.getDisplay()).setSystem(coding.getSystem());	
+				}
+				
 				GoalTargetComponent gtc = out.addTarget().setMeasure(cc4);
 				if (!StringUtils.isEmpty(in.getTargetDateText())) {
 					gtc.setDue(new DateType(in.getTargetDateText()));
@@ -253,21 +279,57 @@ public class GoalMapper implements IGoalMapper {
 
 		}
 
+		if (in.getRelatedGoals() != null) {
+
+			for (MccGoalRelationship relatedGoal : in.getRelatedGoals()) {
+
+				Extension parent = new Extension("http://hl7.org/fhir/StructureDefinition/goal-relationship");
+				out.addExtension(parent);
+
+				CodeableConcept cc = new CodeableConcept();
+				cc.setText(relatedGoal.getType().getText());
+				Extension child1 = new Extension("type", cc);
+				parent.addExtension(child1);
+
+				Reference reference = new Reference();
+				reference.setDisplay(relatedGoal.getTarget().getDisplay());
+
+				Extension child2 = new Extension("target", reference);
+				parent.addExtension(child2);
+
+//				Extension extension = new Extension().setUrl(RELATEDGOALS);
+//				extension.addChild("valueCodeableConcept");
+//				
+//				
+//				out.getExtension().add(extension);
+			}
+
+		}
+
 		if (in.getAcceptance() != null) {
-//			for (Acceptance acc2 : in.getAcceptance()) {
-//				CodeableConcept acc = new CodeableConcept();
-//				acc.setText(in.getAcceptance());
-//				for (MccCoding mccode : acc2.getPriority().getCoding()) {
-//					acc.addCoding().setCode(mccode.getCode()).setSystem(mccode.getSystem())
-//							.setDisplay(mccode.getDisplay());
-//				}
+			Extension parent = new Extension().setUrl("http://hl7.org/fhir/StructureDefinition/goal-acceptance");
 
-			Extension extension = new Extension().setUrl("http://hl7.org/fhir/StructureDefinition/goal-acceptance");
-			extension.addExtension().setUrl("status").setValue(new CodeType(in.getAcceptance()));
-//				extension.addExtension().setUrl("priority").setValue(acc);
-			out.getExtension().add(extension);
+			if (in.getAcceptance().getPriority() != null) {
+				CodeableConcept cc = new CodeableConcept();
+				cc.setText(in.getAcceptance().getPriority().getText());
+				Extension child1 = new Extension("priority", cc);
+				parent.addExtension(child1);
+			}
 
-//			}
+			if (in.getAcceptance().getIndividual() != null) {
+				Reference reference = new Reference();
+				reference.setDisplay(in.getAcceptance().getIndividual().getDisplay());
+
+				Extension child2 = new Extension("indivdual", reference);
+				parent.addExtension(child2);
+			}
+
+			if (in.getAcceptance().getCode() != null) {
+				CodeType status = new CodeType(in.getAcceptance().getCode());
+				Extension child2 = new Extension("status", status);
+				parent.addExtension(child2);
+			}
+			out.addExtension(parent);
 		}
 
 		if (in.getAchievementStatus() != null) {
@@ -292,6 +354,9 @@ public class GoalMapper implements IGoalMapper {
 		}
 		if (in.getDescription() != null) {
 			out.setDescription(in.getDescription().getText());
+			if ("TestAllAgain20220818".equals(in.getDescription().getText())) {
+				System.err.println(in.getDescription().getText());
+			}
 		}
 		if (in.getLifecycleStatus() != null) {
 			out.setLifecycleStatus(in.getLifecycleStatus().toCode());
@@ -338,8 +403,39 @@ public class GoalMapper implements IGoalMapper {
 			}
 			out.setTargets(outputTargets);
 		}
+//		if (in.hasAddresses()) {
+//			out.setAddresses(NameResolver.getReferenceNames(in.getAddresses(), ctx));
+//		}
+
 		if (in.hasAddresses()) {
-			out.setAddresses(NameResolver.getReferenceNames(in.getAddresses(), ctx));
+			MccReference[] mccReferences = new MccReference[in.getAddresses().size()];
+			int mccCtr = 0;
+			for (Reference addresses : in.getAddresses()) {
+				mccReferences[mccCtr++] = mapper.fhir2local(addresses, ctx);
+			}
+			out.setAddresses(mccReferences);
+		}
+
+		List<Extension> relationships = in.getExtensionsByUrl(RELATEDGOALS);
+		if (!relationships.isEmpty()) {
+			MccGoalRelationship[] relatedGoals = new MccGoalRelationship[relationships.size()];
+			int mccCtr = 0;
+			for (Extension relationship : relationships) {
+				Extension type = relationship.getExtensionByUrl("type");
+				CodeableConcept valueCodeableConcept = (CodeableConcept) type.getValue();
+				Extension target = relationship.getExtensionByUrl("target");
+				Reference valueReference = (Reference) target.getValue();
+				MccGoalRelationship relatedGoal = new MccGoalRelationship();
+				MccReference relatedGoalTarget = new MccReference();
+				relatedGoalTarget.setDisplay(valueReference.getDisplay());
+				relatedGoal.setTarget(relatedGoalTarget);
+				MccCodeableConcept relatedGoalType = new MccCodeableConcept();
+				relatedGoalType.setText(valueCodeableConcept.getText());
+				relatedGoal.setType(relatedGoalType);
+				relatedGoals[mccCtr++] = relatedGoal;
+
+			}
+			out.setRelatedGoals(relatedGoals);
 		}
 
 		if (in.hasExpressedBy()) {
@@ -350,35 +446,40 @@ public class GoalMapper implements IGoalMapper {
 
 		List<Extension> acc = in.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/goal-acceptance");
 		if (acc != null && acc.size() > 0) {
-
-			StringBuilder val = new StringBuilder();
-//			int cnt = 0;
 			for (Extension e : acc) {
 
 				Acceptance a = new Acceptance();
-				List<Extension> i = e.getExtensionsByUrl("individual");
+				List<Extension> i = e.getExtensionsByUrl("indivdual");
 				if (!i.isEmpty()) {
 					Base b = i.get(0).getValue();
+					if (b != null) {
 					Reference r = b.castToReference(b);
-//				a.setIndividual(mapper.fhir2local(r, ctx));
-					val.append(r.getDisplay());
+					a.setIndividual(mapper.fhir2local(r, ctx));
+					}
+
 				}
 
 				List<Extension> s = e.getExtensionsByUrl("status");
 				if (!s.isEmpty()) {
 					Base b = s.get(0).getValue();
-					val.append(b.castToCode(b).getValue());
-//				a.setCode(b.castToCode(b).getValue());
+					if (b != null) {
+					a.setCode(b.castToCode(b).getValue());
+					}
 				}
 				List<Extension> p = e.getExtensionsByUrl("priority");
 				if (!p.isEmpty()) {
 					Base b = p.get(0).getValue();
-					val.append(b.castToCodeableConcept(b).getText());
-//				a.setPriority(mapper.fhir2local(b.castToCodeableConcept(b), ctx));
+					if (b != null) {
+						a.setPriority(mapper.fhir2local(b.castToCodeableConcept(b), ctx));
+					}
 				}
+
+				out.setAcceptance(a);
+				break;
 			}
-//			acceptances[cnt] = a;
-			out.setAcceptance(val.toString());
+			
+			out.setNotes(FHIRHelper.annotationsToStringList(in.getNote(), ctx));
+			
 		}
 		return out;
 	}

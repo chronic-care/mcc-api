@@ -231,7 +231,8 @@ public class ConditionLists {
                 // problem-list-item | encounter-diagnosis | health-concern
                 String categories = c.getCategories();
                 isProblemOrEncounter = categories.contains("problem-list-item") || categories.contains("encounter-diagnosis");
-                isHealthConcern = categories.contains("health-concern");
+                isHealthConcern = categories.contains("health-concern")  ||categories.contains("reason-for-visit")   ;
+                
             }
             else
             {

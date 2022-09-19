@@ -666,7 +666,7 @@ public class ObservationController {
     public MccObservation[] getObservationsByCategory(@RequestParam(required = true, name = "subject") String subjectId, @RequestParam(required = true, name = "category") String category, @RequestParam(name = "max", defaultValue = "100") int maxItems, @RequestParam(name = "sort", defaultValue = "ascending") String sortOrder, @RequestParam(name = "mode", defaultValue = "code") String mode, @RequestParam(required = false, name = "requiredunit") String unit, @RequestHeader Map<String, String> headers, WebRequest webRequest) {
 
         if (bLogCalls) {
-            log.info("Get: /observationsbycategory " + subjectId + ", for valueset " + category);
+            log.info("Get: /observationsbycategory " + subjectId + ", for category " + category);
         }
 
 

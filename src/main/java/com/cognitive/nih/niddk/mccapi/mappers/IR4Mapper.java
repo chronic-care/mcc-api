@@ -89,4 +89,5 @@ public interface IR4Mapper {
     MccDosage fhir2local(Dosage in, Context ctx);
 
     IFHIRNormalizer getNormalizer();
+	ServiceRequestSummary fhir2ServiceRequestSummary(ServiceRequest p, Context ctx);
 }

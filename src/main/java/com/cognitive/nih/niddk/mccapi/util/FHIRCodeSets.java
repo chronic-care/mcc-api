@@ -15,5 +15,6 @@ public class FHIRCodeSets {
         US_CORE_CONDITION_CATEGORY_SET = new HashSet<String>();
         US_CORE_CONDITION_CATEGORY_SET.add(CONDITION_CATEGORY_US_CORE);
         US_CORE_CONDITION_CATEGORY_SET.add(CONDITION_CATEGORY);
+        US_CORE_CONDITION_CATEGORY_SET.add("http://open.epic.com/FHIR/StructureDefinition/condition-category");
     }
 }

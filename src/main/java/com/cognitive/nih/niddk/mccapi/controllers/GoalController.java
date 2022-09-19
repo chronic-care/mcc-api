@@ -1,6 +1,7 @@
 /*Copyright 2021 Cognitive Medical Systems*/
 package com.cognitive.nih.niddk.mccapi.controllers;
 
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ import com.cognitive.nih.niddk.mccapi.managers.QueryManager;
 import com.cognitive.nih.niddk.mccapi.mappers.GoalMapper;
 import com.cognitive.nih.niddk.mccapi.mappers.IR4Mapper;
 import com.cognitive.nih.niddk.mccapi.services.FHIRServices;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -127,9 +130,15 @@ public class GoalController {
 				identifierScope = "https://gw.interop.community/SyntheaTest8/data";
 			}
 
-			logger.error("getIOPatient( identifierScope, subjectId) " + identifierScope + " , " + subjectId);
+			logger.trace("getIOPatient( identifierScope, subjectId) " + identifierScope + " , " + subjectId);
 
-			Patient ioPatient = getIOPatient(identifierScope, subjectId);
+			Patient ioPatient = null;
+			try {
+				ioPatient = getIOPatient(identifierScope, subjectId);
+			} catch (Throwable ste) {
+				logger.error("getIOPatient( identifierScope, subjectId) " + identifierScope + " , " + subjectId + ste.getLocalizedMessage());
+
+			}
 
 			if (ioPatient != null) {
 
@@ -185,7 +194,6 @@ public class GoalController {
 
 		}
 		logger.error("END commonGoalSummary");
-
 		return out;
 	}
 

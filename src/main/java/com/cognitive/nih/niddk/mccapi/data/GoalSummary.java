@@ -2,6 +2,7 @@
 package com.cognitive.nih.niddk.mccapi.data;
 
 import com.cognitive.nih.niddk.mccapi.data.primative.MccCodeableConcept;
+import com.cognitive.nih.niddk.mccapi.data.primative.MccReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -23,10 +24,12 @@ class GoalSummary {
     private String lifecycleStatus;
     private String startDateText;
     private String targetDateText;
-    private String addresses;
+    private MccReference[] addresses;
     private String expressedBy;
-    private String acceptance;
+   
+    
     private GoalTarget[] targets;
+    private MccGoalRelationship[] relatedGoals;
    
    
 
@@ -47,5 +50,5 @@ class GoalSummary {
     private MccCodeableConcept[] outcomeCodes;
     private String outcomeReference;
     private String server;
-//    private Acceptance acceptance[];
+    private Acceptance acceptance;
 }
